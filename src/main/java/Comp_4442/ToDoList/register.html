@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8">
+    <title>Register - To-Do List</title>
+    <link rel="stylesheet" href="css/register.css">
+</head>
+<body>
+<div class="auth-card">
+    <div class="header">
+        <h3>Create New Account</h3>
+        <p>Welcome to ToDoList Company</p>
+    </div>
+    <div id="alertBox" class="alert hidden"></div>
+    <form id="registerForm">
+        <div class="input-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" placeholder="3-8 number or characters" required>
+        </div>
+        <div class="input-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="A least 8 characters" required>
+        </div>
+        <div class="input-group">
+            <label for="confirmPassword">Confirm Password</label>
+            <input type="password" id="confirmPassword" placeholder="Repeat your password" required>
+        </div>
+        <button type="submit" class="btn-success">Register</button>
+        <div class="footer-link">
+            Already have account? <a href="login.html">Return Login</a>
+        </div>
+    </form>
+</div>
+<script src="js/register.js"></script>
+</body>
+</html>

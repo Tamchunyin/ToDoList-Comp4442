@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - List system</title>
+    <link rel="stylesheet" href="css/login.css">
+</head>
+<body>
+<div class="auth-card">
+    <div class="header">
+        <h3>Welcome Back</h3>
+        <p>Please Log in to system</p>
+    </div>
+    <div id="alertBox" class="alert hidden"></div>
+    <form id="loginForm">
+        <div class="input-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" required>
+        </div>
+        <div class="input-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" required>
+        </div>
+        <button type="submit" class="btn-primary">Login</button>
+        <div class="footer-link">
+            No Account? <a href="register.html">Create New</a>
+        </div>
+    </form>
+</div>
+<script src="js/login.js"></script>
+</body>
+</html>
