@@ -1,6 +1,7 @@
 document.getElementById('registerForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const alertBox = document.getElementById('alertBox');
+    const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
     const confirm = document.getElementById('confirmPassword').value;
 
@@ -16,7 +17,7 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                username: document.getElementById('username').value,
+                username: username,
                 password: password
             })
         });

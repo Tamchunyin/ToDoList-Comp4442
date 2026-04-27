@@ -29,6 +29,12 @@ public class SecurityConfig {
                         "/api/register",
                         "/api/login"
                 ).permitAll()
+                                .requestMatchers("/userMangement.html").hasRole("ADMIN")
+                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers(
+                                "/inswz.html",
+                                "/api/users/me",
+                                "/api/todos/**").authenticated()
                         .anyRequest().authenticated()
                 )
 
@@ -46,7 +52,7 @@ public class SecurityConfig {
                         .deleteCookies("JSESSIONID")
                         .permitAll()
                 );
-        return  http.build();
+        return http.build();
 
     }
 }
