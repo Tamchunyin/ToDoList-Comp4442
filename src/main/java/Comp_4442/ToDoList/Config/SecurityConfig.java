@@ -29,10 +29,12 @@ public class SecurityConfig {
                         "/api/register",
                         "/api/login"
                 ).permitAll()
+                        .requestMatchers("/personalInfo.html").authenticated()
+                        .requestMatchers("/api/user/**").authenticated()
                                 .requestMatchers("/userMangement.html").hasRole("ADMIN")
                                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers(
-                                "/inswz.html",
+
                                 "/api/users/me",
                                 "/api/todos/**").authenticated()
                         .anyRequest().authenticated()

@@ -24,33 +24,48 @@ async function loadUserInfo() {
 
 async function loadTodos() {
     try {
-        const response = await fetch('/api/todos', {credentials: 'include'});
+        // 💡 獲取當前用戶身分
+        const userRes = await fetch('/api/users/me');
+        const currentUser = await userRes.json();
+        const currentUsername = currentUser.username;
+        const isAdmin = currentUser.role === 'ROLE_ADMIN';
+
+        const response = await fetch('/api/todos');
         const todos = await response.json();
         const listContainer = document.getElementById('todoList');
-        listContainer.innerHTML = todos.map(todo => `
-            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-start p-3">
+
+        listContainer.innerHTML = todos.map(todo => {
+            // 💡 權限判定：是本人或是管理員
+            const isOwner = todo.user && todo.user.username === currentUsername;
+            const canControl = isOwner || isAdmin;
+
+            return `
+            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center p-3 mb-2 rounded border-start ${todo.isPublic ? 'border-info' : 'border-secondary'}" style="border-left-width: 5px;">
                 <div class="ms-2 me-auto">
-                    <div class="fw-bold d-flex align-items-center">
+                    <div class="fw-bold">
                         <span class="priority-dot ${todo.priority}"></span>
-                        ${todo.title} 
-                        ${todo.isPublic ? '<span class="badge bg-info text-dark ms-2" style="font-size: 10px;">Public</span>' : ''}
+                        <span class="${todo.isCompleted ? 'text-decoration-line-through text-muted' : ''}">${todo.title}</span>
+                        ${todo.isPublic ? '<span class="badge bg-info text-dark ms-2">Public</span>' : '<span class="badge bg-light text-muted ms-2">Private</span>'}
                     </div>
                     <small class="text-muted">${todo.content}</small>
-                    <div class="mt-1" style="font-size: 12px; color: #888;">
-                        <i class="bi bi-calendar-event"></i> Due: ${todo.dueDate || 'No Deadline'}
+                    <div style="font-size: 11px; color: #999;" class="mt-1">
+                        Owner: ${todo.user ? todo.user.username : 'Unknown'} | Due: ${todo.dueDate || 'N/A'}
                     </div>
                 </div>
                 <div class="d-flex flex-column align-items-end">
-                    <button class="btn btn-sm btn-outline-success mb-1" onclick="toggleTodo(${todo.id})">
-                        ${todo.isCompleted ? 'Undo' : 'Done'}
-                    </button>
-                    <button class="btn btn-sm btn-outline-danger" onclick="deleteTodo(${todo.id})">Delete</button>
+                    ${canControl ? `
+                        <button class="btn btn-sm ${todo.isCompleted ? 'btn-success' : 'btn-outline-success'} mb-1" onclick="toggleTodo(${todo.id})">
+                            ${todo.isCompleted ? 'Completed' : 'Mark Done'}
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteTodo(${todo.id})">Delete</button>
+                    ` : `
+                        <span class="badge rounded-pill bg-light text-muted border">View Only</span>
+                    `}
                 </div>
-            </div>
-        `).join('');
+            </div>`;
+        }).join('');
     } catch (err) {
-        console.error("ERROR:", err);
-        document.getElementById('todoList').innerHTML = '<div class="alert alert-danger">Loading fail</div>';
+        console.error("Load failed", err);
     }
 }
 
@@ -102,13 +117,11 @@ async function loadUserInfo() {
         const user = await response.json();
         console.log("當前用戶資訊:", user);
 
-        // 💡 修正 1：安全地設定導覽列名字
         const navName = document.getElementById('currentUserName');
         if (navName) {
             navName.textContent = user.username;
         }
 
-        // 💡 修正 2：安全地設定側邊欄名字 (這行最可能是第 109 行的元兇)
         const sidebarName = document.getElementById('sidebarUserName');
         if (sidebarName) {
             sidebarName.textContent = user.username;
@@ -129,22 +142,26 @@ async function loadUserInfo() {
     }
 }
 
-async function deleteTodo(id) {
-    if (!confirm("確定要刪除嗎？")) return;
+async function deleteTodo(id, element) {
+    if (!confirm("Confirm Delete?")) return;
+
+    // 💡 步驟 A：前端先讓該筆資料消失（不需要等待後端）
+    const item = document.querySelector(`button[onclick="deleteTodo(${id})"]`).closest('.list-group-item');
+    item.style.transition = '0.3s';
+    item.style.opacity = '0';
+    setTimeout(() => item.remove(), 300);
+
+    // 💡 步驟 B：背景發送請求
     const response = await fetch(`/api/todos/${id}`, {
         method: 'DELETE',
         credentials: 'include'
     });
-    if (response.ok) await loadTodos(); // 即時重新整理
-}
 
-async function toggleTodo(id) {
-    // 這裡建議後端有一個 PATCH 或 PUT 接口來切換完成狀態
-    const response = await fetch(`/api/todos/${id}/toggle`, {
-        method: 'POST',
-        credentials: 'include'
-    });
-    if (response.ok) await loadTodos(); // 即時重新整理
+    if (!response.ok) {
+        // 如果後端刪除失敗（例如權限不足），再抓回來或報錯
+        alert("Delete Fail. Restore the data...");
+        await loadTodos();
+    }
 }
 async function logout() {
     await fetch('/api/logout', { method: 'POST', credentials: 'include' });

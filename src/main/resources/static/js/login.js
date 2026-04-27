@@ -18,14 +18,26 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         }
 
         if (response.ok) {
-            console.log("Login Success")
+            console.log("Login Success");
             window.location.href = '/index.html';
         } else {
-            alertBox.textContent = 'Wrong Username or Password';
-            alertBox.className = 'alert error';
             alertBox.classList.remove('hidden');
+            alertBox.className = 'alert error';
+            alertBox.classList.add('error');
+
+            if (response.status === 401) {
+                // Spring Security
+                alertBox.textContent = 'Invalid username, password, or account is disabled.';
+            } else if (response.status === 403) {
+                alertBox.textContent = 'Access Denied.';
+            } else {
+                alertBox.textContent = 'Login failed. Please try again later.';
+            }
         }
     } catch (err) {
         console.error('Login error', err);
+        alertBox.classList.add('error');
+        alertBox.textContent = 'Connection error. Please check your server.';
+        alertBox.classList.remove('hidden');
     }
 });

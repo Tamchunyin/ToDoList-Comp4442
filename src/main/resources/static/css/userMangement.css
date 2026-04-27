@@ -86,3 +86,56 @@ button {
         overflow-x: auto;
     }
 }
+/* 激活按鈕 (當前是啟用的，點擊會停權) */
+.btn-disable {
+    background-color: #ffc107; /* 橘黃色警告 */
+    color: #212529;
+}
+
+/* 停權按鈕 (當前是停用的，點擊會激活) */
+.btn-enable {
+    background-color: #28a745; /* 綠色激活 */
+    color: white;
+}
+
+/* 共同懸停效果 */
+.btn-disable:hover, .btn-enable:hover {
+    opacity: 0.8;
+}
+.hidden {
+    display: none;
+}
+
+/* 警告框基礎樣式 */
+.alert {
+    padding: 12px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    font-size: 14px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+/* 錯誤狀態的顏色 (紅色系) */
+.alert.error {
+    background-color: #fdeaea;
+    color: #eb5757;
+    border: 1px solid #f5b7b7;
+}
+
+.btn-secondary {
+    text-decoration: none;
+    color: #888;
+    font-size: 0.9rem;
+    display: inline-block;
+    padding: 8px 16px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background-color: #f8f9fa;
+    color: #333;
+    border-color: #ccc;
+}

@@ -11,66 +11,62 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.stream.Collectors;
 
+// TodoController.java 優化版
 @RestController
-@RequestMapping("/api")
-
+@RequestMapping("/api/todos") // 💡 統一基礎路徑
 public class TodoController {
     @Autowired
     private TodoRepository todoRepository;
-
     @Autowired
     private UserRepository userRepository;
 
-    @GetMapping("/todos")
+    // 1. 取得可見任務：自己的 + 所有人的 Public
+    @GetMapping
     public List<Todo> getVisibleTodos(Principal principal) {
         User currentUser = userRepository.findByUsername(principal.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        return todoRepository.findByUserOrIsPublicTrue(currentUser);
+
+        return todoRepository.findAll().stream()
+                .filter(t -> t.getIsPublic() || t.getUser().getUsername().equals(principal.getName()))
+                .collect(Collectors.toList());
     }
-    @PostMapping("/todos")
-    public ResponseEntity<Todo> addTodo(@RequestBody Todo todo, Principal principal) {
-        User currentUser = userRepository.findByUsername(principal.getName())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        todo.setUser(currentUser);
-        if (todo.getPriority() == null) todo.setPriority("medium");
-        Todo savedTodo = todoRepository.save(todo);
-        return ResponseEntity.ok(savedTodo);
-    }
+
+    // 2. 刪除任務：本人或 ADMIN 才能刪除
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteTodo(@PathVariable Long id, Principal principal) {
-        // 💡 取得當前使用者資訊來判斷權限
         User currentUser = userRepository.findByUsername(principal.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return todoRepository.findById(id)
-                .map(todo -> {
-                    // 💡 優化邏輯：如果不是本人，且「不是 Admin」，才禁止刪除
-                    boolean isOwner = todo.getUser().getUsername().equals(principal.getName());
-                    boolean isAdmin = "ADMIN".equalsIgnoreCase(currentUser.getRole()) ||
-                            "ROLE_ADMIN".equalsIgnoreCase(currentUser.getRole());
+        return todoRepository.findById(id).map(todo -> {
+            boolean isOwner = todo.getUser().getUsername().equals(principal.getName());
+            boolean isAdmin = currentUser.getRole().equalsIgnoreCase("ROLE_ADMIN");
 
-                    if (!isOwner && !isAdmin) {
-                        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                                .body("Only the owner or an admin can delete this task.");
-                    }
-
-                    todoRepository.delete(todo);
-                    return ResponseEntity.ok().build();
-                })
-                .orElse(ResponseEntity.notFound().build());
+            if (isOwner || isAdmin) {
+                todoRepository.delete(todo);
+                return ResponseEntity.ok().build();
+            }
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only owner or admin can delete this task.");
+        }).orElse(ResponseEntity.notFound().build());
     }
-    @PutMapping("/{id}/toggle")
+
+    // 3. 切換狀態：本人或 ADMIN 才能切換
+    @PostMapping("/{id}/toggle")
     public ResponseEntity<?> toggleTodo(@PathVariable Long id, Principal principal) {
-        return todoRepository.findById(id)
-                .map(todo -> {
-                    if (!todo.getUser().getUsername().equals(principal.getName())) {
-                        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("無法修改他人任務");
-                    }
-                    todo.setCompleted(!todo.getCompleted());
-                    todoRepository.save(todo);
-                    return ResponseEntity.ok(todo);
-                })
-                .orElse(ResponseEntity.notFound().build());
+        User currentUser = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return todoRepository.findById(id).map(todo -> {
+            boolean isOwner = todo.getUser().getUsername().equals(principal.getName());
+            boolean isAdmin = currentUser.getRole().equalsIgnoreCase("ROLE_ADMIN");
+
+            if (!isOwner && !isAdmin) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Permission denied.");
+            }
+            todo.setCompleted(!todo.getCompleted());
+            todoRepository.save(todo);
+            return ResponseEntity.ok(todo);
+        }).orElse(ResponseEntity.notFound().build());
     }
 }

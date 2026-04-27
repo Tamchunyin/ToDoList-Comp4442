@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Settings</title>
+    <link rel="stylesheet" href="/css/personalInfo.css">
+</head>
+<body>
+<div class="container">
+    <h2>Profile Settings</h2>
+
+    <div id="alertBox" class="alert hidden"></div>
+
+    <form id="updateForm">
+        <div class="input-group">
+            <label for="newUsername">Update Username</label>
+            <input type="text" id="newUsername" placeholder="Enter new username">
+        </div>
+
+        <div class="input-group">
+            <label for="newPassword">Change Password</label>
+            <input type="password" id="newPassword" placeholder="Leave blank to keep current">
+        </div>
+
+        <button type="submit" class="btn-primary">Save Changes</button>
+    </form>
+
+    <div class="footer-link">
+        <a href="/index.html" class="btn-secondary">← Back to Home</a>
+    </div>
+</div>
+<script src="/js/personalInfo.js"></script>
+</body>
+</html>
