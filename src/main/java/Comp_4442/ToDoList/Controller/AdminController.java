@@ -17,13 +17,11 @@ public class AdminController {
     @Autowired
     private UserRepository userRepository;
 
-    // 1. 取得所有用戶 (現有)
     @GetMapping
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
-    // 2. 刪除用戶 (優化：防止管理員刪除自己)
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable Long id, Principal principal) {
         User admin = userRepository.findByUsername(principal.getName())
@@ -37,7 +35,6 @@ public class AdminController {
         return ResponseEntity.ok("User deleted");
     }
 
-    // 3. 更新權限 (現有)
     @PutMapping("/{id}/role")
     public ResponseEntity<?> updateUserRole(@PathVariable Long id, @RequestBody String newRole) {
         User user = userRepository.findById(id).orElseThrow();
@@ -46,20 +43,18 @@ public class AdminController {
         return ResponseEntity.ok("Role updated");
     }
 
-    // 4. 💡 新增：停權與激活用戶 (Toggle Status)
     @PutMapping("/{id}/status")
     public ResponseEntity<?> toggleUserStatus(@PathVariable Long id, @RequestBody Map<String, Boolean> statusRequest, Principal principal) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // 安全檢查：不允許停權自己
         if (user.getUsername().equals(principal.getName())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You cannot disable your own account.");
         }
 
         Boolean isEnabled = statusRequest.get("enabled");
         if (isEnabled != null) {
-            user.setEnabled(isEnabled); // 確保 User Entity 裡有 enabled 欄位
+            user.setEnabled(isEnabled);
             userRepository.save(user);
         }
 

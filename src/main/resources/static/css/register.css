@@ -1,5 +1,4 @@
-
-body { background: #f8fafc; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: sans-serif; }
+ body{ background: #f8fafc; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: sans-serif; }
 .auth-card { background: white; padding: 40px; border-radius: 12px; border-top: 5px solid #28a745; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 380px; }
 .header h3 { color: #28a745; margin-bottom: 10px; text-align: center;}
 .input-group { margin-bottom: 15px; }

@@ -43,19 +43,14 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
-        // 1. 檢查帳號是否存在
         if (userRepository.existsByUsername(user.getUsername())) {
             return ResponseEntity.badRequest().body("Username already exists");
         }
 
-        // 2. 密碼加密
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-
-        // 3. 💡 關鍵：強制設定註冊者為 USER 角色
-        // 避免有心人透過 Postman 發送 {"role": "ADMIN"} 來竊取管理員權限
         user.setRole("USER");
 
-        // 4. 儲存
+        // Save user to DB
         userRepository.save(user);
 
         return ResponseEntity.ok("Register success");

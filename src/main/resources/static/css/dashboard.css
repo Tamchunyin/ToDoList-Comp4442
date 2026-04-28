@@ -25,7 +25,6 @@ body {
 .priority-dot.medium { background-color: #ffbb33; box-shadow: 0 0 8px rgba(255, 187, 51, 0.4); }
 .priority-dot.low { background-color: #1dd1a1; box-shadow: 0 0 8px rgba(29, 209, 161, 0.4); }
 
-/* 側邊欄美化 */
 #sidebar-wrapper {
     position: fixed;
     left: 0;
@@ -45,7 +44,7 @@ body {
     box-shadow: 10px 0 30px rgba(0,0,0,0.3);
 }
 
-sidebar-wrapper .list-group-item {
+.sidebar-wrapper .list-group-item {
     background: transparent !important;
     color: rgba(255,255,255,0.7) !important;
     border: none;
@@ -74,7 +73,6 @@ sidebar-wrapper .list-group-item {
     color: #3498db;
 }
 
-/* 內容區美化 */
 #page-content-wrapper {
     width: 100%;
     margin-left: 75px;
@@ -83,7 +81,7 @@ sidebar-wrapper .list-group-item {
     background-color: transparent;
 }
 
-/* 任務卡片美化 */
+
 .card {
     border: none;
     border-radius: 15px;
@@ -101,7 +99,6 @@ sidebar-wrapper .list-group-item {
     font-size: 0.95rem;
     font-weight: 500;
     letter-spacing: 0.5px;
-    /* 防止縮小時文字換行或溢出 */
     display: inline-block;
     vertical-align: middle;
 }

@@ -9,20 +9,36 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpHeaders;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.FileSystemResource;
+
+
+import java.io.File;
 import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
-// TodoController.java 優化版
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 @RestController
-@RequestMapping("/api/todos") // 💡 統一基礎路徑
+@RequestMapping("/api/todos")
+// if not define mapping need add path in the lombok
 public class TodoController {
     @Autowired
     private TodoRepository todoRepository;
     @Autowired
     private UserRepository userRepository;
 
-    // 1. 取得可見任務：自己的 + 所有人的 Public
+    // View current user and admin
     @GetMapping
     public List<Todo> getVisibleTodos(Principal principal) {
         User currentUser = userRepository.findByUsername(principal.getName())
@@ -33,7 +49,7 @@ public class TodoController {
                 .collect(Collectors.toList());
     }
 
-    // 2. 刪除任務：本人或 ADMIN 才能刪除
+    // Only current user and admin can delete
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteTodo(@PathVariable Long id, Principal principal) {
         User currentUser = userRepository.findByUsername(principal.getName())
@@ -51,7 +67,6 @@ public class TodoController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
-    // 3. 切換狀態：本人或 ADMIN 才能切換
     @PostMapping("/{id}/toggle")
     public ResponseEntity<?> toggleTodo(@PathVariable Long id, Principal principal) {
         User currentUser = userRepository.findByUsername(principal.getName())
@@ -69,4 +84,46 @@ public class TodoController {
             return ResponseEntity.ok(todo);
         }).orElse(ResponseEntity.notFound().build());
     }
+
+
+
+
+    private final String UPLOAD_DIR = "uploads/";
+    @PostMapping("/{id}/upload")
+    public ResponseEntity<?> uploadFile(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
+        return todoRepository.findById(id).map(todo ->{
+
+            try {
+                File directory = new File(UPLOAD_DIR);
+                if (!directory.exists()) directory.mkdirs();
+
+                String savedFileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+                Path path = Paths.get(UPLOAD_DIR + savedFileName);
+                Files.write(path, file.getBytes());
+
+                todo.setFilePath(path.toString());
+                todo.setFileName(file.getOriginalFilename());
+                todoRepository.save(todo);
+
+                return ResponseEntity.ok("File uploaded successfully");
+            } catch (IOException e) {
+                return ResponseEntity.status(500).body("Upload failed");
+            }
+        }).orElse(ResponseEntity.notFound().build());
+    }
+    @GetMapping("/{id}/download")
+    public ResponseEntity<Resource> downloadFile(@PathVariable Long id) {
+        Todo todo = todoRepository.findById(id).orElseThrow();
+        if (todo.getFilePath() == null) return ResponseEntity.notFound().build();
+
+        File file = new File(todo.getFilePath());
+        Resource resource = new FileSystemResource(file);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + todo.getFileName() + "\"")
+                .body(resource);
+    }
 }
+
+
+

@@ -6,11 +6,11 @@ import lombok.*;
 
 @Entity
 @Table(name = "todos")
-@Getter             // 自動生成所有欄位的 Getter
-@Setter             // 自動生成所有欄位的 Setter
-@NoArgsConstructor  // 自動生成無參數建構子 (JPA 必備)
-@AllArgsConstructor // 自動生成全參數建構子
-@Builder            // 支援流暢的 Builder 模式建立物件
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Todo {
 
     @Id
@@ -38,4 +38,10 @@ public class Todo {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+    @Column(name = "file_path")
+    private String filePath;
+
+    @Column(name = "file_name")
+    private String fileName;
 }

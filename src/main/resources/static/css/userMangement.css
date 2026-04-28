@@ -43,7 +43,6 @@ tr:hover {
     background-color: #f1f1f1;
 }
 
-/* 下拉選單 (Role Select) 樣式 */
 select {
     padding: 6px 10px;
     border-radius: 4px;
@@ -86,19 +85,17 @@ button {
         overflow-x: auto;
     }
 }
-/* 激活按鈕 (當前是啟用的，點擊會停權) */
+
 .btn-disable {
-    background-color: #ffc107; /* 橘黃色警告 */
+    background-color: #ffc107;
     color: #212529;
 }
 
-/* 停權按鈕 (當前是停用的，點擊會激活) */
 .btn-enable {
-    background-color: #28a745; /* 綠色激活 */
+    background-color: #28a745;
     color: white;
 }
 
-/* 共同懸停效果 */
 .btn-disable:hover, .btn-enable:hover {
     opacity: 0.8;
 }
@@ -106,7 +103,6 @@ button {
     display: none;
 }
 
-/* 警告框基礎樣式 */
 .alert {
     padding: 12px;
     margin-bottom: 20px;
@@ -116,7 +112,6 @@ button {
     transition: all 0.3s ease;
 }
 
-/* 錯誤狀態的顏色 (紅色系) */
 .alert.error {
     background-color: #fdeaea;
     color: #eb5757;

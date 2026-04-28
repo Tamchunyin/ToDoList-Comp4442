@@ -33,13 +33,12 @@ async function fetchUsers() {
     });
 }
 
-// 停權/激活切換
 async function toggleStatus(id, currentStatus) {
     const nextStatus = !currentStatus;
     const response = await fetch(`/api/admin/users/${id}/status`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ enabled: nextStatus }) // 符合後端 Map 接收格式
+        body: JSON.stringify({ enabled: nextStatus })
     });
 
     if (response.ok) {

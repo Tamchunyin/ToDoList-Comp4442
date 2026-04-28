@@ -3,28 +3,10 @@ document.addEventListener('DOMContentLoaded', () => {
     loadTodos();
 });
 
-async function loadUserInfo() {
-    try {
-        const response = await fetch('/api/users/me', { credentials: 'include' });
-        if (response.ok) {
-            const user = await response.json();
-            document.getElementById('currentUserName').textContent = user.username;
-
-
-            if (user.role === 'ROLE_ADMIN' || user.role === 'admin') {
-                document.getElementById('adminBtn').style.display = 'block';
-            }
-        } else {
-            window.location.href = '/login.html';
-        }
-    } catch (err) {
-        console.error("Failed to load user info", err);
-    }
-}
 
 async function loadTodos() {
     try {
-        // 💡 獲取當前用戶身分
+
         const userRes = await fetch('/api/users/me');
         const currentUser = await userRes.json();
         const currentUsername = currentUser.username;
@@ -35,7 +17,7 @@ async function loadTodos() {
         const listContainer = document.getElementById('todoList');
 
         listContainer.innerHTML = todos.map(todo => {
-            // 💡 權限判定：是本人或是管理員
+
             const isOwner = todo.user && todo.user.username === currentUsername;
             const canControl = isOwner || isAdmin;
 
@@ -47,11 +29,32 @@ async function loadTodos() {
                         <span class="${todo.isCompleted ? 'text-decoration-line-through text-muted' : ''}">${todo.title}</span>
                         ${todo.isPublic ? '<span class="badge bg-info text-dark ms-2">Public</span>' : '<span class="badge bg-light text-muted ms-2">Private</span>'}
                     </div>
-                    <small class="text-muted">${todo.content}</small>
-                    <div style="font-size: 11px; color: #999;" class="mt-1">
+                    <p class="text-muted mb-1">${todo.content}</p>
+                    
+                    <div class="file-section mt-2">
+                        ${todo.fileName ? `
+                            <div class="mb-2">
+                                <a href="/api/todos/${todo.id}/download" class="btn btn-sm btn-link p-0 text-decoration-none">
+                                    <i class="bi bi-file-earmark-arrow-down"></i> Download: ${todo.fileName}
+                                </a>
+                            </div>
+                        ` : ''}
+
+                        ${canControl ? `
+                            <div class="input-group input-group-sm w-auto">
+                                <input type="file" id="fileInput-${todo.id}" class="form-control form-control-sm">
+                                <button class="btn btn-outline-primary" onclick="uploadFile(${todo.id})">
+                                    <i class="bi bi-upload"></i> Upload
+                                </button>
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <div style="font-size: 11px; color: #999;" class="mt-2">
                         Owner: ${todo.user ? todo.user.username : 'Unknown'} | Due: ${todo.dueDate || 'N/A'}
                     </div>
                 </div>
+                
                 <div class="d-flex flex-column align-items-end">
                     ${canControl ? `
                         <button class="btn btn-sm ${todo.isCompleted ? 'btn-success' : 'btn-outline-success'} mb-1" onclick="toggleTodo(${todo.id})">
@@ -115,7 +118,7 @@ async function loadUserInfo() {
         if (!response.ok) throw new Error('Not logged in');
 
         const user = await response.json();
-        console.log("當前用戶資訊:", user);
+        console.log("Current User:", user);
 
         const navName = document.getElementById('currentUserName');
         if (navName) {
@@ -127,8 +130,7 @@ async function loadUserInfo() {
             sidebarName.textContent = user.username;
         }
 
-        // 💡 修正 3：處理 Admin 權限顯示
-        // 確保判斷字串與後端回傳的 "ROLE_ADMIN" 完全一致
+        // Ensure the admin response is the same
         if (user.role === 'ROLE_ADMIN') {
             const adminBtn = document.getElementById('adminBtn');
             const adminSidebarBtn = document.getElementById('adminSidebarBtn');
@@ -138,27 +140,27 @@ async function loadUserInfo() {
         }
 
     } catch (error) {
-        console.error('載入用戶資訊失敗', error);
+        console.error('Loading Fail', error);
     }
 }
 
 async function deleteTodo(id, element) {
     if (!confirm("Confirm Delete?")) return;
 
-    // 💡 步驟 A：前端先讓該筆資料消失（不需要等待後端）
+    // This just delete the task temporary
     const item = document.querySelector(`button[onclick="deleteTodo(${id})"]`).closest('.list-group-item');
     item.style.transition = '0.3s';
     item.style.opacity = '0';
     setTimeout(() => item.remove(), 300);
 
-    // 💡 步驟 B：背景發送請求
+    //
     const response = await fetch(`/api/todos/${id}`, {
         method: 'DELETE',
         credentials: 'include'
     });
 
     if (!response.ok) {
-        // 如果後端刪除失敗（例如權限不足），再抓回來或報錯
+        // If not match role, restore the Task
         alert("Delete Fail. Restore the data...");
         await loadTodos();
     }
@@ -166,4 +168,23 @@ async function deleteTodo(id, element) {
 async function logout() {
     await fetch('/api/logout', { method: 'POST', credentials: 'include' });
     window.location.href = '/login.html';
+}
+
+async function uploadFile(todoId) {
+    const fileInput = document.getElementById(`fileInput-${todoId}`);
+    if (fileInput.files.length === 0) return alert("Please select a file");
+
+    const formData = new FormData();
+    formData.append("file", fileInput.files[0]);
+
+    const response = await fetch(`/api/todos/${todoId}/upload`, {
+        method: 'POST',
+        body: formData
+
+    });
+
+    if (response.ok) {
+        alert("Upload Success!");
+        loadTodos();
+    }
 }

@@ -21,7 +21,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private UserRepository userRepository;
 
     @Override
-    @Transactional(readOnly = true) // 💡 改善點 1：增加事務唯讀標註，提升查詢效能
+    @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
         User user = userRepository.findByUsername(username)
@@ -29,8 +29,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         String roleInDb = user.getRole();
         String finalRole;
+        // Here is the content with identify database, because DB use ROLE_ADMIN to catch
         if (roleInDb != null && roleInDb.toUpperCase().startsWith("ROLE_")) {
-            finalRole = roleInDb.toUpperCase(); // 直接使用 ROLE_ADMIN
+            finalRole = roleInDb.toUpperCase();
         } else {
             finalRole = "ROLE_" + (roleInDb != null ? roleInDb.toUpperCase() : "USER");
         }

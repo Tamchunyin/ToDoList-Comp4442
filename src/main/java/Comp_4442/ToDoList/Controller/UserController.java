@@ -23,14 +23,13 @@ public class UserController {
 
     @PutMapping("/update")
     public ResponseEntity<?> updateProfile(@RequestBody Map<String, String> data, Principal principal) {
-        // 獲取目前登入的使用者
         User user = userRepository.findByUsername(principal.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         String newUsername = data.get("username");
         String newPassword = data.get("password");
 
-        // 更新用戶名 (需檢查是否重複)
+        // Check username exist or not
         if (newUsername != null && !newUsername.isEmpty() && !newUsername.equals(user.getUsername())) {
             if (userRepository.findByUsername(newUsername).isPresent()) {
                 return ResponseEntity.badRequest().body("Username already exists.");
@@ -38,7 +37,6 @@ public class UserController {
             user.setUsername(newUsername);
         }
 
-        // 更新密碼
         if (newPassword != null && !newPassword.isEmpty()) {
             user.setPassword(passwordEncoder.encode(newPassword));
         }
