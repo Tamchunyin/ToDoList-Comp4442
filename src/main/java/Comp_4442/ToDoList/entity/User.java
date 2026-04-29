@@ -2,6 +2,8 @@ package Comp_4442.ToDoList.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.util.List;
@@ -18,10 +20,13 @@ public class User{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false, length = 50)
+    @Column(unique = true, nullable = false)
+    @Size(min=4, max=20, message = "Username must 4-20 characters")
+    @Pattern(regexp = "^[a-zA-Z0-9._]+$", message = "Username can only contain letters, numbers, dots and underscores")
     private String username;
 
     @Column(nullable = false)
+    @Size(min = 8, message = "Password must be at least 8 characters")
     private  String password;
 
     @OneToMany(mappedBy = "user",cascade = CascadeType.ALL,orphanRemoval = true)
@@ -31,8 +36,8 @@ public class User{
 
     private String role ="USER";
 
-    private boolean enabled = true;
-    public boolean isEnabled() {
+    private Boolean enabled = true;
+    public Boolean isEnabled() {
         return enabled;
     }
 

@@ -28,6 +28,7 @@ public class UserController {
 
         String newUsername = data.get("username");
         String newPassword = data.get("password");
+        boolean isChanged = false;
 
         // Check username exist or not
         if (newUsername != null && !newUsername.isEmpty() && !newUsername.equals(user.getUsername())) {
@@ -35,12 +36,19 @@ public class UserController {
                 return ResponseEntity.badRequest().body("Username already exists.");
             }
             user.setUsername(newUsername);
+            isChanged = true;
         }
 
         if (newPassword != null && !newPassword.isEmpty()) {
-            user.setPassword(passwordEncoder.encode(newPassword));
+            if (passwordEncoder.matches(newPassword, user.getPassword())) {
+            } else {
+                user.setPassword(passwordEncoder.encode(newPassword));
+                isChanged = true;
+            }
         }
-
+        if (!isChanged) {
+            return ResponseEntity.badRequest().body("New info is the same as current info. No update performed.");
+        }
         userRepository.save(user);
         return ResponseEntity.ok("Profile updated");
     }

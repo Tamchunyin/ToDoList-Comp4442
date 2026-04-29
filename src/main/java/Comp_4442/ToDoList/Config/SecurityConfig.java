@@ -16,7 +16,7 @@ public class SecurityConfig {
     public PasswordEncoder EncodePassword(){
         return new BCryptPasswordEncoder();
     }
-
+    // Security rule about springframework security filter (white list for each page）
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
         http

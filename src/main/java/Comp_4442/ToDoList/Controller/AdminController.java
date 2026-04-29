@@ -13,7 +13,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/admin/users")
 public class AdminController {
-
+    //Automatic Dependency Injection
     @Autowired
     private UserRepository userRepository;
 
@@ -22,6 +22,7 @@ public class AdminController {
         return userRepository.findAll();
     }
 
+    //User management to delete User
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable Long id, Principal principal) {
         User admin = userRepository.findByUsername(principal.getName())

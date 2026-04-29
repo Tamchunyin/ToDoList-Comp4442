@@ -47,6 +47,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body("Username already exists");
         }
 
+        user.setEnabled(true);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setRole("USER");
 

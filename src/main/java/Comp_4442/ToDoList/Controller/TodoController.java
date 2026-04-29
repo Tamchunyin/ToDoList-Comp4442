@@ -49,6 +49,13 @@ public class TodoController {
                 .collect(Collectors.toList());
     }
 
+    @PostMapping
+    public ResponseEntity<Todo> createTodo(@RequestBody Todo todo, Principal principal) {
+        User user = userRepository.findByUsername(principal.getName()).orElseThrow();
+        todo.setUser(user);
+        return ResponseEntity.ok(todoRepository.save(todo));
+    }
+
     // Only current user and admin can delete
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteTodo(@PathVariable Long id, Principal principal) {
@@ -60,6 +67,20 @@ public class TodoController {
             boolean isAdmin = currentUser.getRole().equalsIgnoreCase("ROLE_ADMIN");
 
             if (isOwner || isAdmin) {
+                if(todo.getFilePath() != null && !todo.getFilePath().isEmpty()){
+                    try {
+                        java.io.File file = new java.io.File(todo.getFilePath());
+                        if (file.exists()) {
+                            if (file.delete()) {
+                                System.out.println("Delete Success" + todo.getFilePath());
+                            } else {
+                                System.err.println("Delete Fail, Check the role of users");
+                            }
+                        }
+                    } catch (Exception e) {
+                                System.err.println("Delete Error: " + e.getMessage());
+                            }
+                }
                 todoRepository.delete(todo);
                 return ResponseEntity.ok().build();
             }
