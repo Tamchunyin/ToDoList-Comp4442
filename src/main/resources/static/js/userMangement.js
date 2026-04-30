@@ -26,7 +26,7 @@ async function fetchUsers() {
                     </button>
                 </td>
                 <td>
-                    <button class="btn-delete" onclick="deleteUser(${user.id})">Delete</button>
+                    <button class="btn-delete" onclick="deleteUser(${user.id},'${user.username}')">Delete</button>
                 </td>
             </tr>
         `;
@@ -46,6 +46,44 @@ async function toggleStatus(id, currentStatus) {
     } else {
         const errorMsg = await response.text();
         alert("Operation failed: " + errorMsg);
+    }
+}
+async function updateRole(id, newRole) {
+    const response = await fetch(`/api/admin/users/${id}/role`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: newRole
+    });
+
+    if (response.ok) {
+        console.log("Role updated to " + newRole);
+    } else {
+        alert("Failed to update role");
+    }
+}
+async function deleteUser(id, username) {
+    if (!confirm(`Are you sure you want to delete user ID: ${username}?`)) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/admin/users/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (response.ok) {
+            alert("User deleted successfully.");
+            fetchUsers();
+        } else {
+            const errorMsg = await response.text();
+            alert("Delete failed: " + errorMsg);
+        }
+    } catch (error) {
+        console.error("Error deleting user:", error);
+        alert("An error occurred while deleting the user.");
     }
 }
 document.addEventListener('DOMContentLoaded', fetchUsers);
